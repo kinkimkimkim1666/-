@@ -27,21 +27,24 @@
         }
       }
     </script>
-  <script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@18.2.0",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.292.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0",
     "xlsx": "https://esm.sh/xlsx@0.18.5",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
   <body class="bg-cny-red text-white font-sans antialiased selection:bg-cny-gold selection:text-cny-red">
-    <div id="root"></div>
+    <div id="root">
+      <div class="min-h-screen flex items-center justify-center">
+        <div class="animate-pulse text-cny-gold text-xl font-serif">載入中...</div>
+      </div>
+    </div>
   </body>
 </html>

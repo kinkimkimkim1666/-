@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { parseExcelFile } from '../services/excelService';
 import { DailyWinners } from '../types';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Lock } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Lock, Info, Download, Save } from 'lucide-react';
 
 interface AdminPanelProps {
   onUpdateWinners: (data: DailyWinners) => void;
   onClose: () => void;
+  currentData?: DailyWinners; // Pass current data for backup
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose, currentData }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +49,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
     }
   };
 
+  const handleDownloadBackup = () => {
+    if (!currentData) return;
+    const dataStr = JSON.stringify(currentData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cny_winners_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!isAuthenticated) {
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -84,7 +98,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white text-gray-900 rounded-2xl w-full max-w-lg p-8 shadow-2xl relative animate-fade-in">
+      <div className="bg-white text-gray-900 rounded-2xl w-full max-w-lg p-8 shadow-2xl relative animate-fade-in max-h-[90vh] overflow-y-auto">
         <button 
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl"
@@ -98,6 +112,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
         </div>
 
         <div className="space-y-6">
+            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 text-sm text-yellow-800 flex gap-3">
+                <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold mb-1">關於資料儲存：</p>
+                  <p>資料會自動儲存在<span className="font-bold">此瀏覽器</span>。</p>
+                  <p className="mt-1">若要換電腦使用，請點擊下方「備份資料」按鈕。</p>
+                </div>
+            </div>
+
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm text-blue-800">
                 <p className="font-bold mb-1">Excel 格式說明：</p>
                 <p>請上傳包含以下標題的 .xlsx 或 .xls 檔案：</p>
@@ -123,7 +146,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
                     <div className="text-center text-green-600">
                         <CheckCircle className="w-12 h-12 mx-auto mb-2" />
                         <p className="font-bold">更新成功！</p>
-                        <p className="text-xs text-gray-500 mt-1">資料已儲存於此瀏覽器</p>
+                        <p className="text-xs text-gray-500 mt-1">資料已自動儲存</p>
                     </div>
                 ) : (
                     <div className="text-center text-gray-500">
@@ -133,6 +156,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
                     </div>
                 )}
             </div>
+
+            <button 
+                onClick={handleDownloadBackup}
+                className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+                <Download className="w-4 h-4" />
+                備份資料 (下載 JSON)
+            </button>
 
             {error && (
                 <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm">
