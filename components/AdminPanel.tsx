@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { parseExcelFile } from '../services/excelService';
 import { DailyWinners } from '../types';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Lock } from 'lucide-react';
 
 interface AdminPanelProps {
   onUpdateWinners: (data: DailyWinners) => void;
@@ -9,9 +9,24 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
+
+  // Simple hardcoded password
+  const ADMIN_PASSWORD = '8888';
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+        setIsAuthenticated(true);
+        setError(null);
+    } else {
+        setError('密碼錯誤');
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -33,9 +48,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div className="bg-white text-gray-900 rounded-2xl w-full max-w-sm p-8 shadow-2xl relative">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">✕</button>
+                
+                <div className="text-center mb-6">
+                    <div className="w-12 h-12 bg-cny-red/10 text-cny-red rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Lock className="w-6 h-6" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-800">管理員驗證</h2>
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                        <input 
+                            type="password" 
+                            value={passwordInput}
+                            onChange={(e) => setPasswordInput(e.target.value)}
+                            placeholder="請輸入管理密碼 (8888)"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cny-red focus:border-transparent outline-none"
+                            autoFocus
+                        />
+                    </div>
+                    {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+                    <button type="submit" className="w-full bg-cny-red text-white py-2 rounded-lg font-bold hover:bg-red-800 transition-colors">
+                        登入
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white text-gray-900 rounded-2xl w-full max-w-lg p-8 shadow-2xl relative">
+      <div className="bg-white text-gray-900 rounded-2xl w-full max-w-lg p-8 shadow-2xl relative animate-fade-in">
         <button 
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl"
@@ -74,6 +123,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onUpdateWinners, onClose }) => 
                     <div className="text-center text-green-600">
                         <CheckCircle className="w-12 h-12 mx-auto mb-2" />
                         <p className="font-bold">更新成功！</p>
+                        <p className="text-xs text-gray-500 mt-1">資料已儲存於此瀏覽器</p>
                     </div>
                 ) : (
                     <div className="text-center text-gray-500">

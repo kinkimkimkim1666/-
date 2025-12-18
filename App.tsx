@@ -1,23 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import WinnerList from './components/WinnerList';
 import AdminPanel from './components/AdminPanel';
 import { DailyWinners, INITIAL_WINNERS, AppView } from './types';
 import { Settings } from 'lucide-react';
 
+const STORAGE_KEY = 'cny_lucky_draw_data_v1';
+
 const App: React.FC = () => {
   const [currentDay, setCurrentDay] = useState<number>(1);
-  const [winnersData, setWinnersData] = useState<DailyWinners>(INITIAL_WINNERS);
   const [view, setView] = useState<AppView>(AppView.PUBLIC);
+
+  // Load data from LocalStorage on initialization, fallback to INITIAL_WINNERS
+  const [winnersData, setWinnersData] = useState<DailyWinners>(() => {
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
+    } catch (e) {
+      console.error("Failed to load saved data", e);
+    }
+    return INITIAL_WINNERS;
+  });
 
   const days = [1, 2, 3, 4, 5];
 
   const handleUpdateWinners = (newData: DailyWinners) => {
-    // Merge new data with existing structure to ensure all days exist
-    setWinnersData(prev => ({
-        ...prev,
+    // Merge new data with existing structure
+    const updatedData = {
+        ...winnersData,
         ...newData
-    }));
+    };
+    
+    setWinnersData(updatedData);
+    
+    // Save to LocalStorage
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+    } catch (e) {
+      console.error("Failed to save data", e);
+      alert("注意：由於瀏覽器限制，資料可能無法儲存。");
+    }
+  };
+
+  // Optional: Function to clear data and reset to defaults (can be added to UI if needed)
+  const handleReset = () => {
+     if(confirm('確定要重置所有名單回到預設值嗎？')) {
+        setWinnersData(INITIAL_WINNERS);
+        localStorage.removeItem(STORAGE_KEY);
+     }
   };
 
   return (
