@@ -3,9 +3,9 @@ import Header from './components/Header';
 import WinnerList from './components/WinnerList';
 import AdminPanel from './components/AdminPanel';
 import { DailyWinners, INITIAL_WINNERS, AppView } from './types';
-import { Settings, AlertTriangle } from 'lucide-react';
+import { Settings, AlertTriangle, Heart } from 'lucide-react';
 
-const STORAGE_KEY = 'cny_lucky_draw_data_v1';
+const STORAGE_KEY = 'cny_lucky_draw_data_v3';
 
 // Simple Error Boundary to catch React crashes
 class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean, error: Error | null }> {
@@ -97,7 +97,7 @@ const AppContent: React.FC = () => {
                 key={day}
                 onClick={() => setCurrentDay(day)}
                 className={`
-                    px-6 py-2 rounded-full font-bold text-sm md:text-base transition-all duration-300 transform
+                    px-6 py-2 rounded-full font-bold text-sm md:text-base transition-all duration-300 transform flex items-center gap-1
                     ${currentDay === day 
                         ? 'bg-cny-gold text-cny-red shadow-[0_0_15px_rgba(244,180,0,0.5)] scale-105 ring-2 ring-white/20' 
                         : 'bg-black/20 text-cny-yellow hover:bg-black/40 border border-transparent hover:border-cny-gold/30'
@@ -126,6 +126,14 @@ const AppContent: React.FC = () => {
             管理員登入
         </button>
       </footer>
+
+      {/* Status Indicator with Heart */}
+      <div className="fixed bottom-4 right-4 z-50 pointer-events-none select-none">
+        <div className="bg-pink-600/90 backdrop-blur text-white px-3 py-1.5 rounded-full shadow-lg font-bold text-xs border border-white/20 flex items-center gap-2">
+            <Heart className="w-4 h-4 fill-white animate-pulse" />
+            系統已更新 (Ver Heart ❤️)
+        </div>
+      </div>
 
       {/* Admin Modal */}
       {view === AppView.ADMIN && (
